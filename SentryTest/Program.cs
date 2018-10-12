@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SentryTest
 {
@@ -19,7 +14,18 @@ namespace SentryTest
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+                .ConfigureAppConfiguration((context, builder) =>
+                {
+                    builder
+                        .SetBasePath(context.HostingEnvironment.ContentRootPath)
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true)
+                        .AddEnvironmentVariables();
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<IStartup, Startup>();
+                })
                 .UseSentry();
     }
 }
