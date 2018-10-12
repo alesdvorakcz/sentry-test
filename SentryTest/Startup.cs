@@ -1,8 +1,12 @@
 ﻿using System;
+using Autofac;
+using Autofac.Core;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SentryTest.Services;
 
 namespace SentryTest
 {
@@ -16,8 +20,9 @@ namespace SentryTest
 
         public IHostingEnvironment Environment { get; }
         public IConfiguration Configuration { get; }
-        
 
+        public IContainer Container { get; set; }
+        
         public void Configure(IApplicationBuilder app)
         {
             if (Environment.IsDevelopment())
@@ -30,9 +35,22 @@ namespace SentryTest
         
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            var containerBuilder = new ContainerBuilder();
 
-            return services.BuildServiceProvider();
+            services
+                .AddMvc()
+                .AddControllersAsServices();
+
+            containerBuilder
+                .RegisterType<ValueService>()
+                .As<IValueService>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.Populate(services);
+
+            Container = containerBuilder.Build();
+
+            return Container.Resolve<IServiceProvider>();
         }
     }
 }
