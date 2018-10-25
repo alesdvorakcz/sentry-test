@@ -1,32 +1,44 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SentryTest.Services;
 
 namespace SentryTest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ValuesController : BaseController
     {
         private readonly IValueService _valueService;
 
-        public ValuesController(IValueService valueService)
+        public ValuesController(IValueService valueService, ILogger<ValuesController> logger) : base(logger)
         {
             _valueService = valueService;
         }
 
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public IActionResult Get()
         {
-            return Ok(_valueService.GetAll());
+            return HandleExceptions(() =>
+            {
+                var result = _valueService.GetAll();
+                return Ok(result);
+            });
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        public IActionResult Get(int id)
         {
-            return Ok(_valueService.Get(id));
+            if (id == 4)
+                throw new Exception("Exception from controller");
+
+            return HandleExceptions(() =>
+            {
+                var result = _valueService.Get(id);
+                return Ok(result);
+            });
         }
     }
 }

@@ -18,7 +18,7 @@ namespace SentryTest.Services
 
         public string Get(int id)
         {
-            throw new Exception("some exception to log by sentry");
+            throw new Exception("some exception from service to log by sentry");
         }
     }
 }
