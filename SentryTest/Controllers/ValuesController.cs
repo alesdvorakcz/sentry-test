@@ -5,7 +5,8 @@ using SentryTest.Services;
 
 namespace SentryTest.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{api-version:apiVersion}/[controller]")]
     [ApiController]
     public class ValuesController : BaseController
     {
